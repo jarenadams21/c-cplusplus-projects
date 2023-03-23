@@ -16,8 +16,8 @@ struct user {
 
 int main() {
 
-    // User for application
-    struct user usr;
+    // Users for application
+    struct user usr, transferUser;
 
     // Store users in a file
     FILE *fp;
@@ -34,8 +34,6 @@ int main() {
 
     // Amount to deposit
     float amount;
-
-
 
     printf("\nWhat do you want to do?");
     printf("\n\n1. Register an account");
@@ -91,6 +89,7 @@ int main() {
 
         // Successfull login
         if(!strcmp(pword, usr.password)) {
+            printf("\n\tWelcome %s\n", usr.phone);
             while(cont == 'y') {
                 system("clear");
                 printf("\nPress 1 to check balance");
@@ -103,7 +102,7 @@ int main() {
 
                 switch(choice) {
                     case 1: 
-                        printf("\nYour current balance is", usr.balance);
+                        printf("\nYour current balance is %f", usr.balance);
                         break;
                     case 2:
                         printf("\nEnter an amount to deposit:\t");
@@ -125,7 +124,51 @@ int main() {
                         break;
                         // 27:50
                     case 4:
+                        printf("\nPlease enter the phone number to transfer the balance:\t");
+                        scanf("%s", phone);
+                        printf("\nPlease enter the amount to transfer:\t");
+                        scanf("%f", &amount);
+                        if(amount > usr.balance) printf("\nInsuffienct balance...");
+                        else {
+                            strcpy(filename, phone);
+                            fp = fopen(strcat(filename, ".dat"), "r");
+                            // Invalid phone number?
+                            if(fp == NULL) {
+                                printf("\nPhone number not registered in system.");
+                                return 0;
+                            }
 
+                            fread(&transferUser, sizeof(struct user), 1, fp);
+                            fclose(fp);
+                            transferUser.balance += amount;
+                            fp = fopen(filename, "w");
+                            fwrite(&transferUser, sizeof(struct user), 1, fp);
+
+                            fclose(fp);
+                            if(fwrite != NULL) {
+                                printf("\n You have successfully transferred the amount.");
+                                strcpy(filename, usr.phone);
+                                fp = fopen(strcat(filename, ".dat"), "w");
+                                usr.balance -= amount;
+                                fwrite(&usr, sizeof(struct user), 1, fp);
+                                fclose(fp);
+                            }
+                           
+                        }
+                        break;
+
+                    case 5:
+                        printf("\nPlease enter your new password:\t");
+                        scanf("%s", pword);
+                        fp = fopen(filename, "w");
+                        strcpy(usr.password, pword);
+                        fwrite(&usr, sizeof(struct user), 1, fp);
+                        if(fwrite != NULL) {
+                             printf("\nPassword successfully changed.");
+                        }
+                        break;
+                    default:
+                        printf("\nInvalid option selected...");
                 }
 
                 printf("\nDo you want to continue the transaction [y/n]");
